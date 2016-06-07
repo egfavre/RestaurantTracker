@@ -24,6 +24,8 @@ public class Main {
                         return new ModelAndView(m,  "login.html");
                     }
                     else {
+                        User user = users.get(username);
+                        m.put("restaurants", user.restaurants);
                         return new ModelAndView(m, "home.html");
                     }
                 },
@@ -44,7 +46,7 @@ public class Main {
                         user = new User(name, pass);
                         users.put(name, user);
                     }
-                    else if (!name.equals(user.name)){
+                    else if (!pass.equals(user.password)){
                         throw new Exception("wrong password");
                     }
                     Session session = request.session();
@@ -78,6 +80,34 @@ public class Main {
 
                     user.restaurants.add(r);
 
+                    response.redirect("/");
+                    return "";
+                }
+        );
+        Spark.post(
+                "/logout",
+                (request, response) -> {
+                    Session session = request.session();
+                    session.invalidate();
+                    response.redirect("/");
+                    return "";
+                }
+        );
+        Spark.post(
+                "/delete-restaurant",
+                (request, response) -> {
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    if (username == null){
+                        throw new Exception("Not Logged In");
+                    }
+
+                    int id = Integer.valueOf(request.queryParams("id"));
+                    User user = users.get(username);
+                    if (id <= 0 || id -1 >= user.restaurants.size()){
+                        throw new Exception("invalid id");
+                    }
+                    user.restaurants.remove(id-1);
                     response.redirect("/");
                     return "";
                 }
