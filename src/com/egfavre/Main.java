@@ -54,5 +54,33 @@ public class Main {
                     return "";
                 }
         );
+        Spark.post(
+                "/create-restaurant",
+                (request, response) -> {
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    if (username == null){
+                        throw new Exception("Not Logged In");
+                    }
+                    String name = request.queryParams("name");
+                    String location = request.queryParams("location");
+                    int rating = Integer.valueOf(request.queryParams("rating"));
+                    String comment = request.queryParams("comment");
+                    if (name == null || location == null || comment == null){
+                        throw new Exception("Invalid Fields");
+                    }
+
+                    User user = users.get(username);
+                    if (user == null){
+                        throw new Exception("User does not exist");
+                    }
+                    Restaurant r = new Restaurant(name, location, rating, comment);
+
+                    user.restaurants.add(r);
+
+                    response.redirect("/");
+                    return "";
+                }
+        );
     }
 }
